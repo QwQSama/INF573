@@ -1,0 +1,17 @@
+Images of horses and humans
+Homepage: http://laurencemoroney.com/horses-or-humans-dataset
+
+requirements:
+
+numpy
+scipy
+Pillow
+cython
+matplotlib
+scikit-image
+tensorflow>=1.3.0
+keras>=2.0.8
+opencv-python
+h5py
+imgaug
+IPython[all]
