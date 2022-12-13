@@ -10,7 +10,7 @@ import numpy as np
 
 # load pre-trained model
 model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False, pretrained_backbone=True)
-model.load_state_dict(torch.load('fasterrcnn_resnet50_fpn_coco-258fb6c6.pth'))
+model.load_state_dict(torch.load('fasterrcnn_resnet50_anime.pth'))
 model = model.cuda()
 model.eval()
 
