@@ -1,64 +1,59 @@
-# coding:utf8
 from os.path import exists
-import sys
+import argparse
 import torch
 import torchvision
 from torchvision import transforms
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from PIL import Image
 import cv2
 import numpy as np
+from ISDA import FullLayer
+from faster_rcnn import fasterrcnn_resnet50_fpn
 
-model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False, pretrained_backbone=True)
-model.load_state_dict(torch.load('fasterrcnn_resnet50_fpn_coco-258fb6c6.pth'))
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--input_path', type=str, default='Genshin.mp4')
+parser.add_argument('--in_channels', type=int, default=12544)
+parser.add_argument('--representation_size', type=int, default=1024)
+parser.add_argument('--model', type=str, default='fasterrcnn_resnet50_anime.pth')
+parser.add_argument('--fc', type=str, default='fasterrcnn_fc.pth')
+parser.add_argument('--output_path', type=str, default='Genshin_FasterRCNN/')
+
+args = parser.parse_args()
+
+model = fasterrcnn_resnet50_fpn(pretrained=False, pretrained_backbone=True)
+if exists(args.model):
+    model.load_state_dict(torch.load(args.model))
+
+fc = FullLayer(args.in_channels, args.representation_size)
+if exists(args.fc):
+    fc.load_state_dict(torch.load(args.fc))
+
 model = model.cuda()
+fc = fc.cuda()
 model.eval()
+fc.eval()
 
 data_transform = transforms.ToTensor()
 
-input_video = cv2.VideoCapture("Thorin_Input.mp4")
+input_video = cv2.VideoCapture(args.input_path)
 fps = input_video.get(cv2.CAP_PROP_FPS)
-size = (
-    int(input_video.get(cv2.CAP_PROP_FRAME_WIDTH)),
-    int(input_video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-)
+size = (int(input_video.get(cv2.CAP_PROP_FRAME_WIDTH)),
+        int(input_video.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
-videoWriter = cv2.VideoWriter(
-    "output_video.mp4",
-    cv2.VideoWriter_fourcc("M", "J", "P", "G"),  # 编码器
-    fps,
-    size
-)
-
-'''
-编码器常用的几种：
-cv2.VideoWriter_fourcc("M", "J", "P", "G")  
-#  视频MP4
-
-cv2.VideoWriter_fourcc("I", "4", "2", "0") 
-#    压缩的yuv颜色编码器，4:2:0色彩度子采样 兼容性好，产生很大的视频 avi
-
-cv2.VideoWriter_fourcc("P", "I", "M", "I")
-#    采用mpeg-1编码，文件为avi
-
-cv2.VideoWriter_fourcc("X", "V", "T", "D")
-#    采用mpeg-4编码，得到视频大小平均 拓展名avi
-
-cv2.VideoWriter_fourcc("T", "H", "E", "O")
-#    Ogg Vorbis， 拓展名为ogv
-
-cv2.VideoWriter_fourcc("F", "L", "V", "1")
-#    FLASH视频，拓展名为.flv
-'''
+videoWriter = cv2.VideoWriter(args.output_path,
+                              cv2.VideoWriter_fourcc("M", "J", "P", "G"),  # Encoder
+                              fps,
+                              size)
 
 success, frame = input_video.read()
-while success:  # 循环直到没有帧了
+while success:  # Loop until finish
     img = data_transform(frame)
     img = torch.unsqueeze(img, dim=0)
     img = img.cuda()
 
     output = model(img)
-    # 提取检测结果
+    output = fc(output)
+
+    # Extract results
     boxes = output[0]['boxes'].data.cpu().numpy()
     scores = output[0]['scores'].data.cpu().numpy()
 
@@ -67,7 +62,7 @@ while success:  # 循环直到没有帧了
     print(len(img[0]))
     img *= 255
     img = np.ascontiguousarray(img, dtype=np.uint8)
-    # 绘制检测结果
+    # Draw bounding boxes
     for i in range(len(boxes)):
         if scores[i] > 0.8:
             print(scores[i])
