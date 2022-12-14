@@ -51,7 +51,6 @@ while success:  # Loop until finish
     img = img.cuda()
 
     output = model(img)
-    output = fc(output)
 
     # Extract results
     boxes = output[0]['boxes'].data.cpu().numpy()
