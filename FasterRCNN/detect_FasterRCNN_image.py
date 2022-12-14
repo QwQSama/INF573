@@ -49,7 +49,6 @@ for frame in range(len(images)):
     img = img.cuda()
     # Detect
     output = model(img)
-    output = fc(output)
     # Extract results
     boxes = output[0]['boxes'].data.cpu().numpy()
     scores = output[0]['scores'].data.cpu().numpy()
