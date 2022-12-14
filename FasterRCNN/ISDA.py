@@ -139,8 +139,6 @@ class FullLayer(torch.nn.Module):
         self.fc7 = nn.Linear(representation_size, representation_size)
 
     def forward(self, x):
-        x = x.flatten(start_dim=1)
-
         x = F.relu(self.fc6(x))
         x = F.relu(self.fc7(x))
 
