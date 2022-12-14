@@ -9,7 +9,7 @@ from torchvision.models.detection.generalized_rcnn import GeneralizedRCNN
 from torchvision.models.detection.rpn import RPNHead, RegionProposalNetwork
 from torchvision.models.detection.roi_heads import RoIHeads
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
-from torchvision.models.detection.backbone_utils import resnet_fpn_backbone, _validate_trainable_layers, mobilenet_backbone
+from torchvision.models.detection.backbone_utils import resnet_fpn_backbone, _validate_trainable_layers
 
 
 __all__ = [
@@ -150,15 +150,14 @@ class FastRCNNPredictor(nn.Module):
         self.cls_score = nn.Linear(in_channels, num_classes)
         self.bbox_pred = nn.Linear(in_channels, num_classes * 4)
 
-    # def forward(self, x):
-    #     print('test')
-    #     if x.dim() == 4:
-    #         assert list(x.shape[2:]) == [1, 1]
-    #     x = x.flatten(start_dim=1)
-    #     scores = self.cls_score(x)
-    #     bbox_deltas = self.bbox_pred(x)
-    #
-    #     return scores, bbox_deltas
+    def forward(self, x):
+        if x.dim() == 4:
+            assert list(x.shape[2:]) == [1, 1]
+        x = x.flatten(start_dim=1)
+        scores = self.cls_score(x)
+        bbox_deltas = self.bbox_pred(x)
+
+        return scores, bbox_deltas
 
 
 def fasterrcnn_resnet50_fpn(pretrained=False, progress=True,
