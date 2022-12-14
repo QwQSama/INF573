@@ -10,12 +10,12 @@ from faster_rcnn import fasterrcnn_resnet50_fpn
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--input_path', type=str, default='Genshin.mp4')
+parser.add_argument('--input_path', type=str, default='./Genshin.mp4')
 parser.add_argument('--in_channels', type=int, default=12544)
 parser.add_argument('--representation_size', type=int, default=1024)
-parser.add_argument('--model', type=str, default='fasterrcnn_resnet50_anime.pth')
-parser.add_argument('--fc', type=str, default='fasterrcnn_fc.pth')
-parser.add_argument('--output_path', type=str, default='Genshin_FasterRCNN/')
+parser.add_argument('--model', type=str, default='./fasterrcnn_resnet50_anime.pth')
+parser.add_argument('--fc', type=str, default='./fasterrcnn_fc.pth')
+parser.add_argument('--output_path', type=str, default='./Genshin_FasterRCNN/')
 
 args = parser.parse_args()
 
